@@ -1,24 +1,8 @@
 const fs = require('fs');
-const readline = require('readline');
-
-// Get all lines as a separate array item for easier processing
-async function getFileByLinesIntoArray() {
-  const lines = [];
-  const fileStream = fs.createReadStream('report.txt');
-
-  const rl = readline.createInterface({
-    input: fileStream,
-    crlfDelay: Infinity
-  });
-
-  for await (const line of rl) {
-    lines.push(line)
-  }
-  return lines
-}
 
 (async function() {
-  const lines = await getFileByLinesIntoArray();
+  const file = fs.readFileSync('report.txt', 'utf-8');
+  const lines = file.split(/\n/)
   try {
     // For each first number go through all other numbers and determine if the two together = 2020,
     // if not go to the next number and repeat until this matches something

@@ -1,27 +1,13 @@
 const fs = require('fs');
 const readline = require('readline');
 
-// Get all lines as a separate array item for easier processing
-async function getFileByLinesIntoArray() {
-  const lines = [];
-  const fileStream = fs.createReadStream('passwords.txt');
-
-  const rl = readline.createInterface({
-    input: fileStream,
-    crlfDelay: Infinity
-  });
-
-  for await (const line of rl) {
-    lines.push(line.split(' '))
-  }
-  return lines
-}
-
-(async function() {
-  const lines = await getFileByLinesIntoArray();
+const passwords = () => {
+  const file = fs.readFileSync('passwords.txt', 'utf-8');
+  const lines = file.split(/\n/)
   let goodPasswords = 0;
   let badPasswords = 0;
-  for (const line of lines) {
+  for (let oldLine of lines) {
+    const line = oldLine.split(' ')
     const [rangeChars, char, password] = line
     const [ min, max ] = rangeChars.split('-')
     const [ charSanitized ] = char.split(':')
@@ -37,4 +23,6 @@ async function getFileByLinesIntoArray() {
     goodPasswords,
     badPasswords
   });
-})()
+}
+
+passwords()

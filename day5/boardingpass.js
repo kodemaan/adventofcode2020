@@ -1,6 +1,4 @@
 const fs = require('fs')
-const {exit} = require('process')
-const {rootCertificates} = require('tls')
 
 const boardingPass = async () => {
   const file = fs.readFileSync('boardingpass.txt', 'utf-8')
