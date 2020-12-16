@@ -31,66 +31,76 @@ class Passport {
     }, {})
   }
 
+  hasAllKeys = () => {
+    return this.requiredFields.every(key => this.fields[key])
+  }
+
   isValidPassport = () => {
     const missingOrInvalid = []
-    this.requiredFields.forEach(key => {
+    if (!this.hasAllKeys()) {
+      return false
+    }
+    for (const key in this.fields) {
+      const value = this.fields[key]
+      // Invalid or falsy value
+      if (!value) {
+        return false
+      }
       switch (key) {
         case 'byr':
-          const birthYear = Number(this.fields[key])
-          if (birthYear >= 1920 && birthYear <= 2002) {
-            return
+          const birthYear = Number(value)
+          if (birthYear < 1920 || birthYear > 2002) {
+            return false
           }
-          missingOrInvalid.push(key)
           break;
         case 'iyr':
-          const issueYear = Number(this.fields[key])
-          if (issueYear < 2010 && issueYear > 2020) {
-            missingOrInvalid.push(key)
-            return
+          const issueYear = Number(value)
+          if (issueYear < 2010 || issueYear > 2020) {
+            return false
+          }
+          break;
+        case 'eyr':
+          const expireYear = Number(value)
+          if (expireYear < 2020 || expireYear > 2030) {
+            return false
           }
           break;
         case 'hgt':
-          const heightNumber = Number(this.fields[key].replace(/[^\d]/g, '')) 
+          const heightNumber = Number(value.replace(/[^\d]/g, '')) 
           let measure = null 
-          if (this.fields[key].includes('cm')) {
+          if (value.includes('cm')) {
             measure = 'cm'
-          } else if (this.fields[key].includes('in')) {
+          } else if (value.includes('in')) {
             measure = 'in'
           }
           if (!measure) {
-            missingOrInvalid.push(key)
-            return
+            return false
           }
           if (measure === 'cm' && (heightNumber < 150 || heightNumber > 193)) {
-            missingOrInvalid.push(key)
-            return
+            return false
           }
           if (measure === 'in' && (heightNumber < 59 || heightNumber > 76)) {
-            missingOrInvalid.push(key)
-            return
+            return false
           }
           break;
         case 'hcl':
-          if (!this.fields[key].test(/^#[0-9a-z]{6}/)) {
-            missingOrInvalid.push(key)
+          if (!/^#[0-9a-z]{6}$/.test(value)) {
+            return false
           }
           break;
         case 'ecl':
-          if (!['amb','blu','brn','gry','grn','hzl','oth'].includes(this.fields[key])) {
-            missingOrInvalid.push(key)
+          if (!['amb','blu','brn','gry','grn','hzl','oth'].includes(value)) {
+            return false;
           }
           break;
+        case 'pid':
+          if (!/^[0-9]{9}$/.test(value)) {
+            return false
+          }
       }
-    });
-    // If all fields available then it's valid
-    if (missingOrInvalid.length === 0) {
-      return true;
     }
-    // If all fields available but the non-north pole field (cid) then it's valid
-    if (missingOrInvalid.length === 1 && missingOrInvalid[0] === 'cid') {
-      return true
-    }
-    return false
+    console.log(this.fields['hcl'].length);
+    return true
   }
 }
 
