@@ -1,5 +1,4 @@
 const fs = require('fs')
-const { exit } = require('process')
 
 const groups = async () => {
   const file = fs.readFileSync('groups.txt', 'utf-8')
