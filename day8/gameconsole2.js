@@ -23,13 +23,15 @@ const runAllLines = (parsedLines) => {
       RunLog:
       for (let i = 0; i < runLog.length; i++) {
         totalRuns += 1
-        if (parsedLines[i].flipped || parsedLines[i].method === 'acc') {
+        const entry = runLog[i]
+        const runLine = parsedLines[entry]
+        if (runLine.flipped || runLine.method === 'acc') {
           continue RunLog
         }
-        previouslyFlipped = i
-        parsedLines[i] = {
-          ...parsedLines[i],
-          method: parsedLines[i].method === 'jmp' ? 'nop' : 'jmp',
+        previouslyFlipped = entry
+        parsedLines[entry] = {
+          ...line,
+          method: line.method === 'jmp' ? 'nop' : 'jmp',
           flipped: true
         }
         break
