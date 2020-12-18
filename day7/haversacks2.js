@@ -13,30 +13,23 @@ class BagsMap {
     }
     const secondBagsIterator = secondBagsString.matchAll(/(\d) (\w+ \w+) bag/g)
     const secondBags = []
-    if (firstBag === 'shiny gold') {
-      console.log('hi');
-    }
     for (const secondBag of secondBagsIterator) {
-      secondBags.push({name: secondBag[2], count: secondBag[1]})
+      secondBags.push({name: secondBag[2], count: Number(secondBag[1])})
     }
     this.bagsCanHoldMap.set(firstBag, secondBags)
   }
 
-  subObjectsBags (secondBags) {
-    let bagCount = 0
-    for (let secondBag of secondBags) {
-      if (this.bagsCanHoldMap.has(secondBag.name)) {
-        bagCount += Number(secondBag.count) + (Number(secondBag.count) * this.subObjectsBags(this.bagsCanHoldMap.get(secondBag.name)))
-      } else {
-        return secondBag.count
-      }
-    }
-    return bagCount
-  }
-
   countHowManyBags = (bag = null) => {
+    let count = 1
     const secondBags = this.bagsCanHoldMap.get(bag)
-    return this.subObjectsBags(secondBags)
+    if (!secondBags) {
+      return 1
+    }
+    for (let secondBag of secondBags) {
+      const qty = secondBag.count
+      count += qty * this.countHowManyBags(secondBag.name)
+    }
+    return count;
   }
 }
 const boardingPass = () => {
@@ -46,7 +39,8 @@ const boardingPass = () => {
   for (const line of lines) {
     bagsMap.addLine(line) 
   }
-  return bagsMap.countHowManyBags('shiny gold')
+  // of by one error
+  return bagsMap.countHowManyBags('shiny gold') - 1
 }
 
 const goldCount = boardingPass()
