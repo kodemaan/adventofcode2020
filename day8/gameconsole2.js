@@ -5,44 +5,20 @@ const runAllLines = (parsedLines) => {
   let currentLine = 0
   let aggregate = 0
   let runLog = []
-  let previouslyFlipped = false
-  let totalRuns = 0
-  MainLoop:
+  const parsedLinesCopy = [...parsedLines]
   while (ranTwice === false) {
-    const line = parsedLines[currentLine]
+    const line = parsedLinesCopy[currentLine]
     // If end of file then fail out
     if (!line) {
       ranTwice = true
       return aggregate
     }
-    if (parsedLines[currentLine].invoked > 0) {
+    if (parsedLinesCopy[currentLine].invoked > 0) {
+      ranTwice = true
       // Reset previously flipped but acknowledge it was flipped
-      if (previouslyFlipped) {
-        parsedLines[previouslyFlipped].method = parsedLines[previouslyFlipped].method === 'jmp' ? 'nop' : 'jmp'
-      }
-      RunLog:
-      for (let i = 0; i < runLog.length; i++) {
-        totalRuns += 1
-        const entry = runLog[i]
-        const runLine = parsedLines[entry]
-        if (runLine.flipped || runLine.method === 'acc') {
-          continue RunLog
-        }
-        previouslyFlipped = entry
-        parsedLines[entry] = {
-          ...line,
-          method: line.method === 'jmp' ? 'nop' : 'jmp',
-          flipped: true
-        }
-        break
-      }
-      parsedLines = parsedLines.map(line => {line.invoked = false;return line})
-      currentLine = 0
-      aggregate = 0
-      runLog = []
-      continue MainLoop
+      return false
     }
-    parsedLines[currentLine].invoked = 1
+    parsedLinesCopy[currentLine].invoked = 1
     runLog.push(currentLine)
     switch (line.method) {
       case 'nop':
@@ -67,8 +43,8 @@ const runAllLines = (parsedLines) => {
   }
 }
 const parse = () => {
-   const file = fs.readFileSync('testeq5.txt', 'utf-8') // Equals 6 for this example
-  //const file = fs.readFileSync('puzzle.txt', 'utf-8')
+   //const file = fs.readFileSync('testeq5.txt', 'utf-8') // Equals 6 for this example
+  const file = fs.readFileSync('puzzle.txt', 'utf-8')
   const lines = file.split('\n')
   const parsedLines = []
   for (let i in lines) {
@@ -82,7 +58,25 @@ const parse = () => {
       flipped: false // Set this to true for acc by default so it never flips
     })
   }
-  const aggregate = runAllLines(parsedLines)
-  console.log({aggregate});
+  for (let lineKey in parsedLines) {
+    const line = parsedLines[lineKey]
+    if (['nop', 'jmp'].includes(line.method)) {
+      const newCommand = line.method === 'nop' ? 'jmp' : 'nop'
+      const newParsedLines = copyParseLines(parsedLines)
+      newParsedLines[lineKey].method = newCommand
+      const aggregate = runAllLines(newParsedLines)
+      if (!aggregate) {
+        continue
+      } else {
+        console.log({aggregate});
+        break
+      }
+    }
+  }
+}
+
+function copyParseLines(parsedLines) {
+  // The sub-objects were still mapping by reference..... hopefully this doesn't cause slowdowns
+  return parsedLines.map(item => ({...item}))
 }
 parse()
