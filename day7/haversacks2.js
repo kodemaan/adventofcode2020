@@ -1,6 +1,4 @@
 const fs = require('fs')
-const {exit} = require('process')
-
 
 class BagsMap {
   bagsCanHoldMap = new Map()
